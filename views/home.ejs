@@ -1,0 +1,203 @@
+<%- include('partials/head') %>
+<%- include('partials/header', { categories, platformOptions }) %>
+
+<main class="wrapper page-home">
+  <section class="version-highlight">
+    <h1><%= site.siteName %> - Nova Versão Super Atualizada</h1>
+    <p>Interface melhorada, navegação por carrossel, recomendações inteligentes e desempenho otimizado em qualquer dispositivo.</p>
+  </section>
+
+  <section class="notifications-row">
+    <% notifications.forEach((item) => { %>
+      <article class="notification <%= item.type %>"><%= item.message %></article>
+    <% }) %>
+  </section>
+
+  <section class="carousel-block">
+    <div class="section-title-row">
+      <h2>Atualizações</h2>
+      <div class="carousel-controls">
+        <button class="ghost-btn" data-carousel-prev="bannerCarousel">◀</button>
+        <button class="ghost-btn" data-carousel-next="bannerCarousel">▶</button>
+      </div>
+    </div>
+    <div class="carousel-window" data-carousel="bannerCarousel">
+      <div class="carousel-track banner-track">
+        <% banners.forEach((banner) => { %>
+          <a href="<%= banner.link %>" class="hero-card carousel-item" style="background-image:url('<%= banner.image %>')">
+            <span class="badge"><%= banner.badge %></span>
+            <strong><%= banner.title %></strong>
+          </a>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+
+  <section class="carousel-block">
+    <div class="section-title-row">
+      <h2>Recomendados para Você</h2>
+      <div>
+        <a href="/buscar?sort=featured">Ver todos</a>
+        <span class="carousel-controls">
+          <button class="ghost-btn" data-carousel-prev="featuredCarousel">◀</button>
+          <button class="ghost-btn" data-carousel-next="featuredCarousel">▶</button>
+        </span>
+      </div>
+    </div>
+    <div class="carousel-window" data-carousel="featuredCarousel">
+      <div class="carousel-track app-track">
+        <% featured.forEach((appItem) => { %>
+          <article
+            class="app-card js-app-card carousel-item"
+            data-id="<%= appItem.id %>"
+            data-slug="<%= appItem.slug %>"
+            data-name="<%= appItem.name %>"
+            data-category="<%= appItem.category ? appItem.category.name : 'Sem categoria' %>"
+            data-version="<%= appItem.version || '' %>"
+            data-downloads="<%= appItem.downloads || 0 %>"
+          >
+            <a href="/apk/<%= appItem.slug %>">
+              <img src="<%= appItem.icon %>" alt="<%= appItem.name %>" loading="lazy" />
+            </a>
+            <div>
+              <h3><a href="/apk/<%= appItem.slug %>"><%= appItem.name %></a></h3>
+              <p><%= appItem.shortDescription %></p>
+              <small><%= (appItem.categories || []).map((item) => item.name).join(', ') || 'Sem categoria' %> • <%= appItem.downloads.toLocaleString('pt-BR') %> downloads</small>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+
+  <section class="carousel-block">
+    <div class="section-title-row">
+      <h2>Últimas Atualizações</h2>
+      <div>
+        <a href="/recentes">Ver todos</a>
+        <span class="carousel-controls">
+          <button class="ghost-btn" data-carousel-prev="recentCarousel">◀</button>
+          <button class="ghost-btn" data-carousel-next="recentCarousel">▶</button>
+        </span>
+      </div>
+    </div>
+    <div class="carousel-window" data-carousel="recentCarousel">
+      <div class="carousel-track app-track">
+        <% recent.forEach((appItem) => { %>
+          <article
+            class="app-card js-app-card carousel-item"
+            data-id="<%= appItem.id %>"
+            data-slug="<%= appItem.slug %>"
+            data-name="<%= appItem.name %>"
+            data-category="<%= appItem.category ? appItem.category.name : 'Sem categoria' %>"
+            data-version="<%= appItem.version || '' %>"
+            data-downloads="<%= appItem.downloads || 0 %>"
+          >
+            <a href="/apk/<%= appItem.slug %>"><img src="<%= appItem.icon %>" alt="<%= appItem.name %>" loading="lazy" /></a>
+            <div>
+              <h3><a href="/apk/<%= appItem.slug %>"><%= appItem.name %></a></h3>
+              <p><%= appItem.shortDescription %></p>
+              <% if ((appItem.requiredApps || []).length > 0) { %>
+                <small>Requer <%= appItem.requiredApps.length %> app(s)</small>
+              <% } %>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+
+  <section class="carousel-block">
+    <div class="section-title-row">
+      <h2>Mais Populares</h2>
+      <div>
+        <a href="/populares">Ver todos</a>
+        <span class="carousel-controls">
+          <button class="ghost-btn" data-carousel-prev="popularCarousel">◀</button>
+          <button class="ghost-btn" data-carousel-next="popularCarousel">▶</button>
+        </span>
+      </div>
+    </div>
+    <div class="carousel-window" data-carousel="popularCarousel">
+      <div class="carousel-track app-track">
+        <% popular.forEach((appItem) => { %>
+          <article
+            class="app-card js-app-card carousel-item"
+            data-id="<%= appItem.id %>"
+            data-slug="<%= appItem.slug %>"
+            data-name="<%= appItem.name %>"
+            data-category="<%= appItem.category ? appItem.category.name : 'Sem categoria' %>"
+            data-version="<%= appItem.version || '' %>"
+            data-downloads="<%= appItem.downloads || 0 %>"
+          >
+            <a href="/apk/<%= appItem.slug %>"><img src="<%= appItem.icon %>" alt="<%= appItem.name %>" loading="lazy" /></a>
+            <div>
+              <h3><a href="/apk/<%= appItem.slug %>"><%= appItem.name %></a></h3>
+              <p><%= appItem.downloads.toLocaleString('pt-BR') %> downloads</p>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+
+  <% (homeCarousels || []).forEach((carousel) => { %>
+    <section class="carousel-block">
+      <div class="section-title-row">
+        <h2><%= carousel.name %></h2>
+        <div>
+          <a href="/colecao/<%= carousel.slug %>">Ver tudo</a>
+          <span class="carousel-controls">
+            <button class="ghost-btn" data-carousel-prev="homeCarousel-<%= carousel.id %>">◀</button>
+            <button class="ghost-btn" data-carousel-next="homeCarousel-<%= carousel.id %>">▶</button>
+          </span>
+        </div>
+      </div>
+      <div class="carousel-window" data-carousel="homeCarousel-<%= carousel.id %>">
+        <div class="carousel-track app-track">
+          <% carousel.apps.forEach((appItem) => { %>
+            <article class="app-card js-app-card carousel-item" data-id="<%= appItem.id %>" data-slug="<%= appItem.slug %>" data-name="<%= appItem.name %>" data-category="<%= appItem.category ? appItem.category.name : 'Sem categoria' %>" data-version="<%= appItem.version || '' %>" data-downloads="<%= appItem.downloads || 0 %>">
+              <a href="/apk/<%= appItem.slug %>"><img src="<%= appItem.icon %>" alt="<%= appItem.name %>" loading="lazy" /></a>
+              <div>
+                <h3><a href="/apk/<%= appItem.slug %>"><%= appItem.name %></a></h3>
+                <p><%= appItem.shortDescription %></p>
+                <small><%= (appItem.categories || []).map((item) => item.name).join(', ') || 'Sem categoria' %></small>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      </div>
+    </section>
+  <% }) %>
+
+  <section class="carousel-block">
+    <div class="section-title-row">
+      <h2>Posts e Comunicados</h2>
+      <div>
+        <a href="/comunicados">Ver todos</a>
+        <span class="carousel-controls">
+          <button class="ghost-btn" data-carousel-prev="postCarousel">◀</button>
+          <button class="ghost-btn" data-carousel-next="postCarousel">▶</button>
+        </span>
+      </div>
+    </div>
+    <div class="carousel-window" data-carousel="postCarousel">
+      <div class="carousel-track post-track">
+        <% posts.forEach((post) => { %>
+          <article class="post-card carousel-item js-post-card" data-post-slug="<%= post.slug %>">
+            <% if (post.image) { %>
+              <a href="/comunicado/<%= post.slug %>"><img src="<%= post.image %>" alt="<%= post.title %>" loading="lazy" /></a>
+            <% } %>
+            <div>
+              <h3><a href="/comunicado/<%= post.slug %>"><%= post.title %></a></h3>
+              <p><%= post.subtitle || post.description %></p>
+              <small><%= new Date(post.createdAt).toLocaleDateString('pt-BR') %></small>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/footer') %>

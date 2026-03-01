@@ -1,0 +1,70 @@
+<%- include('partials/head') %>
+<%- include('partials/header', { categories, platformOptions }) %>
+
+<main class="wrapper posts-page">
+  <section class="listing-head">
+    <h1><%= heading %></h1>
+    <p>Atualizações oficiais, novidades do site e comunicados da equipe Arcevo.</p>
+  </section>
+
+  <% if (posts.length > 0) { %>
+    <% const featuredPost = posts[0]; %>
+    <section class="post-highlight">
+      <article class="post-highlight-card">
+        <% if (featuredPost.image) { %>
+          <a href="/comunicado/<%= featuredPost.slug %>"><img src="<%= featuredPost.image %>" alt="<%= featuredPost.title %>" loading="lazy" /></a>
+        <% } %>
+        <div>
+          <span class="badge">Destaque</span>
+          <h2><a href="/comunicado/<%= featuredPost.slug %>"><%= featuredPost.title %></a></h2>
+          <% if (featuredPost.subtitle) { %>
+            <p class="muted"><%= featuredPost.subtitle %></p>
+          <% } %>
+          <p><%= featuredPost.description %></p>
+          <% if ((featuredPost.postButtons || []).length > 0) { %>
+            <div class="tags-line">
+              <% featuredPost.postButtons.slice(0, 3).forEach((button) => { %>
+                <small class="premium-tag"><%= button.label %></small>
+              <% }) %>
+            </div>
+          <% } %>
+          <small><%= new Date(featuredPost.createdAt).toLocaleString('pt-BR') %></small>
+        </div>
+      </article>
+    </section>
+  <% } %>
+
+  <section>
+    <div class="section-title-row">
+      <h2>Todos os comunicados</h2>
+      <span><%= posts.length %> post(s)</span>
+    </div>
+
+    <div class="posts-grid">
+      <% posts.forEach((post) => { %>
+        <article class="post-card post-grid-card js-post-card" data-post-slug="<%= post.slug %>">
+          <% if (post.image) { %>
+            <a href="/comunicado/<%= post.slug %>"><img src="<%= post.image %>" alt="<%= post.title %>" loading="lazy" /></a>
+          <% } %>
+          <div>
+            <h3><a href="/comunicado/<%= post.slug %>"><%= post.title %></a></h3>
+            <% if (post.subtitle) { %>
+              <p class="muted"><%= post.subtitle %></p>
+            <% } %>
+            <p><%= post.description %></p>
+            <% if ((post.postButtons || []).length > 0) { %>
+              <div class="tags-line">
+                <% post.postButtons.slice(0, 2).forEach((button) => { %>
+                  <small class="premium-tag"><%= button.label %></small>
+                <% }) %>
+              </div>
+            <% } %>
+            <small><%= new Date(post.updatedAt || post.createdAt).toLocaleDateString('pt-BR') %></small>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/footer') %>

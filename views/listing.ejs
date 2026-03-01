@@ -1,0 +1,86 @@
+<%- include('partials/head') %>
+<%- include('partials/header', { categories, platformOptions }) %>
+
+<main class="wrapper page-listing" data-page="listing">
+  <section class="listing-head">
+    <h1><%= heading %></h1>
+    <form action="/buscar" method="GET" class="advanced-search" id="searchForm">
+      <input type="text" name="q" placeholder="Buscar por nome, descrição, atualização..." value="<%= filters.q || '' %>" />
+
+      <select name="category">
+        <option value="">Todas categorias</option>
+        <% categories.forEach((cat) => { %>
+          <option value="<%= cat.slug %>" <%= filters.category === cat.slug ? 'selected' : '' %>><%= cat.name %></option>
+        <% }) %>
+      </select>
+
+      <select name="premium">
+        <option value="">Todos recursos premium</option>
+        <% premiumTags.forEach((item) => { %>
+          <option value="<%= item.slug %>" <%= filters.premium === item.slug ? 'selected' : '' %>><%= item.name %></option>
+        <% }) %>
+      </select>
+
+      <select name="platform">
+        <option value="">Todas plataformas</option>
+        <% (platformOptions || []).forEach((item) => { %>
+          <option value="<%= item.slug %>" <%= filters.platform === item.slug ? 'selected' : '' %>><%= item.name %></option>
+        <% }) %>
+      </select>
+
+      <select name="sort">
+        <option value="featured" <%= filters.sort === 'featured' ? 'selected' : '' %>>Destaque</option>
+        <option value="recent" <%= filters.sort === 'recent' ? 'selected' : '' %>>Mais recentes</option>
+        <option value="popular" <%= filters.sort === 'popular' ? 'selected' : '' %>>Mais populares</option>
+      </select>
+
+      <button type="submit">Filtrar</button>
+    </form>
+  </section>
+
+  <section class="listing-toolbar">
+    <p id="resultCounter"><%= apps.length %> resultado(s)</p>
+    <button id="loadMoreBtn" type="button" class="linkish-btn" hidden>Carregar mais</button>
+  </section>
+
+  <section class="apps-grid" id="listingGrid">
+    <% if (apps.length === 0) { %>
+      <div class="empty-state">Nenhum APK encontrado com os filtros atuais.</div>
+    <% } %>
+
+    <% apps.forEach((appItem) => { %>
+      <article
+        class="app-card wide js-app-card js-listing-card"
+        data-id="<%= appItem.id %>"
+        data-slug="<%= appItem.slug %>"
+        data-name="<%= appItem.name %>"
+        data-category="<%= appItem.category ? appItem.category.name : 'Sem categoria' %>"
+        data-version="<%= appItem.version || '' %>"
+        data-downloads="<%= appItem.downloads || 0 %>"
+      >
+        <a href="/apk/<%= appItem.slug %>">
+          <img src="<%= appItem.icon %>" alt="<%= appItem.name %>" loading="lazy" />
+        </a>
+        <div>
+          <h3><a href="/apk/<%= appItem.slug %>"><%= appItem.name %></a></h3>
+          <p><%= appItem.shortDescription %></p>
+          <div class="tags-line">
+            <span><%= (appItem.categories || []).map((cat) => cat.name).join(', ') || 'Sem categoria' %></span>
+            <% (appItem.platforms || []).forEach((platform) => { %>
+              <small class="premium-tag"><%= platform.name %></small>
+            <% }) %>
+            <% appItem.premiumTags.forEach((tag) => { %>
+              <small class="premium-tag"><%= tag.name %></small>
+            <% }) %>
+          </div>
+          <% if ((appItem.requiredApps || []).length > 0) { %>
+            <small>Requer <%= appItem.requiredApps.length %> app(s) obrigatório(s)</small>
+          <% } %>
+          <small><%= appItem.downloads.toLocaleString('pt-BR') %> downloads</small>
+        </div>
+      </article>
+    <% }) %>
+  </section>
+</main>
+
+<%- include('partials/footer') %>

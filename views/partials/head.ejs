@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <% const meta = (typeof seo === 'object' && seo) ? seo : {}; %>
+  <% const metaTitle = meta.title || title || (site && site.siteName) || 'Arcevo Apks'; %>
+  <% const metaDescription = meta.description || (site && site.subtitle) || 'Baixe APKs atualizados com segurança.'; %>
+  <% const metaCanonical = meta.canonical || ''; %>
+  <% const metaImage = meta.image || ''; %>
+  <% const metaType = meta.type || 'website'; %>
+  <% const metaRobots = meta.robots || 'index, follow'; %>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= metaTitle %></title>
+  <meta name="description" content="<%= metaDescription %>" />
+  <meta name="robots" content="<%= metaRobots %>" />
+  <meta name="theme-color" content="#0d2a35" />
+
+  <% if (metaCanonical) { %>
+    <link rel="canonical" href="<%= metaCanonical %>" />
+  <% } %>
+
+  <meta property="og:locale" content="pt_BR" />
+  <meta property="og:type" content="<%= metaType %>" />
+  <meta property="og:title" content="<%= metaTitle %>" />
+  <meta property="og:description" content="<%= metaDescription %>" />
+  <% if (metaCanonical) { %>
+    <meta property="og:url" content="<%= metaCanonical %>" />
+  <% } %>
+  <% if (metaImage) { %>
+    <meta property="og:image" content="<%= metaImage %>" />
+  <% } %>
+
+  <meta name="twitter:card" content="<%= metaImage ? 'summary_large_image' : 'summary' %>" />
+  <meta name="twitter:title" content="<%= metaTitle %>" />
+  <meta name="twitter:description" content="<%= metaDescription %>" />
+  <% if (metaImage) { %>
+    <meta name="twitter:image" content="<%= metaImage %>" />
+  <% } %>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <% if (meta.structuredData) { %>
+    <script type="application/ld+json"><%- JSON.stringify(meta.structuredData).replace(/</g, '\\u003c') %></script>
+  <% } %>
+</head>
+<body class="theme-<%= (site && site.theme) ? site.theme : 'ocean' %>">

@@ -1,0 +1,26 @@
+<%- include('partials/head') %>
+
+<main class="admin-login-wrap">
+  <form id="adminLoginForm" class="admin-login-card">
+    <h1>Painel Arcevo Apks</h1>
+    <p>Autenticação protegida para gerenciamento completo do site.</p>
+
+    <label>
+      Usuário
+      <input type="text" name="username" autocomplete="username" required />
+    </label>
+
+    <label>
+      Senha
+      <input type="password" name="password" autocomplete="current-password" required />
+    </label>
+
+    <button type="submit">Entrar no painel</button>
+    <a href="/">Voltar para o site</a>
+    <p id="loginMessage"></p>
+  </form>
+</main>
+
+<script src="/js/admin-login.js" defer></script>
+</body>
+</html>

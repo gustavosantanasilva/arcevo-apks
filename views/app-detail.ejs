@@ -1,0 +1,148 @@
+<%- include('partials/head') %>
+<%- include('partials/header', { categories, platformOptions }) %>
+
+<main class="wrapper app-detail-page">
+  <section class="app-cover" style="background-image:url('<%= appItem.cover %>')">
+    <div class="overlay">
+      <img src="<%= appItem.icon %>" alt="<%= appItem.name %>" loading="lazy" />
+      <div>
+        <h1><%= appItem.name %></h1>
+        <p><%= appItem.shortDescription %></p>
+        <div class="meta-line">
+          <span>Versão <%= appItem.version %></span>
+          <span><%= (appItem.categories || []).map((item) => item.name).join(', ') || 'Sem categoria' %></span>
+          <span>
+            <% if ((appItem.platforms || []).length > 0) { %>
+              <%= appItem.platforms.map((platform) => platform.name).join(', ') %>
+            <% } else { %>
+              Mobile
+            <% } %>
+          </span>
+          <span><%= new Date(appItem.createdAt).toLocaleDateString('pt-BR') %></span>
+        </div>
+      </div>
+      <div class="detail-cta-stack">
+        <% if ((appItem.platformLinks || []).length > 0) { %>
+          <% appItem.platformLinks.forEach((link) => { %>
+            <a class="download-btn platform-download-btn" href="/go/<%= appItem.slug %>/<%= link.platformSlug %>">
+              <span class="platform-icon"><%= link.platformSlug === 'pc' ? '🖥' : (link.platformSlug === 'mobile' ? '📱' : '⬇') %></span>
+              <span>Baixar para <%= link.platformName %></span>
+            </a>
+          <% }) %>
+        <% } else { %>
+          <a class="download-btn" href="/go/<%= appItem.slug %>">Baixar APK</a>
+        <% } %>
+        <button type="button" class="ghost-btn" data-copy-url="<%= appItem.shortLink || ('/go/' + appItem.slug) %>">Copiar link</button>
+      </div>
+    </div>
+  </section>
+
+  <% if ((appItem.requiredApps || []).length > 0) { %>
+    <section class="required-alert">
+      <div class="required-alert-head">
+        <strong>Apps obrigatórios para funcionamento</strong>
+        <span><%= appItem.requiredApps.length %> app(s) necessário(s)</span>
+      </div>
+      <p>Antes de abrir este app, instale também os aplicativos obrigatórios abaixo:</p>
+      <div class="required-alert-actions">
+        <% appItem.requiredApps.forEach((required) => { %>
+          <a class="required-alert-btn" href="/apk/<%= required.slug %>">
+            <img src="<%= required.icon %>" alt="<%= required.name %>" loading="lazy" />
+            <span><%= required.name %></span>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+
+  <section class="detail-grid">
+    <article>
+      <h2>Descrição</h2>
+      <p><%= appItem.description %></p>
+
+      <h3>Detalhes da atualização</h3>
+      <p><%= appItem.details %></p>
+
+      <h3>Recursos premium</h3>
+      <div class="tags-line">
+        <% if (appItem.premiumTags.length === 0) { %>
+          <span>Sem recursos premium vinculados</span>
+        <% } %>
+        <% appItem.premiumTags.forEach((tag) => { %>
+          <small class="premium-tag"><%= tag.name %></small>
+        <% }) %>
+      </div>
+
+      <% if ((appItem.requiredApps || []).length > 0) { %>
+        <h3>Apps obrigatórios</h3>
+        <div class="required-apps-note">Este app precisa dos aplicativos abaixo para funcionar corretamente:</div>
+        <div class="required-apps-list">
+          <% appItem.requiredApps.forEach((required) => { %>
+            <a class="required-app-card" href="/apk/<%= required.slug %>">
+              <img src="<%= required.icon %>" alt="<%= required.name %>" loading="lazy" />
+              <span><%= required.name %></span>
+            </a>
+          <% }) %>
+        </div>
+      <% } %>
+    </article>
+
+    <aside>
+      <h3>Dados rápidos</h3>
+      <ul class="quick-data">
+        <li><strong>Downloads:</strong> <%= appItem.downloads.toLocaleString('pt-BR') %></li>
+        <li><strong>Atualizado em:</strong> <%= new Date(appItem.updatedAt).toLocaleString('pt-BR') %></li>
+        <li>
+          <strong>Tipo de link:</strong>
+          <%= appItem.shortLink ? 'Encurtado' : 'Direto' %>
+        </li>
+        <% if ((appItem.platformLinks || []).length > 0) { %>
+          <li><strong>Plataformas com download:</strong> <%= appItem.platformLinks.map((item) => item.platformName).join(', ') %></li>
+        <% } %>
+        <% if (appItem.shortLink) { %>
+          <li><strong>Link encurtado principal:</strong> <a href="<%= appItem.shortLink %>" target="_blank">Abrir</a></li>
+        <% } %>
+      </ul>
+    </aside>
+  </section>
+
+  <section>
+    <div class="section-title-row">
+      <h2>Relacionados</h2>
+      <div>
+        <% if (appItem.category) { %>
+          <a href="/categoria/<%= appItem.category.slug %>">Ver todos</a>
+        <% } %>
+        <span class="carousel-controls">
+          <button class="ghost-btn" data-carousel-prev="relatedCarousel">◀</button>
+          <button class="ghost-btn" data-carousel-next="relatedCarousel">▶</button>
+        </span>
+      </div>
+    </div>
+    <div class="carousel-window" data-carousel="relatedCarousel">
+      <section class="carousel-track app-track">
+        <% related.forEach((item) => { %>
+          <article
+            class="app-card js-app-card carousel-item"
+            data-id="<%= item.id %>"
+            data-slug="<%= item.slug %>"
+            data-name="<%= item.name %>"
+            data-category="<%= item.category ? item.category.name : 'Sem categoria' %>"
+            data-version="<%= item.version || '' %>"
+            data-downloads="<%= item.downloads || 0 %>"
+          >
+            <a href="/apk/<%= item.slug %>">
+              <img src="<%= item.icon %>" alt="<%= item.name %>" loading="lazy" />
+            </a>
+            <div>
+              <h3><a href="/apk/<%= item.slug %>"><%= item.name %></a></h3>
+              <p><%= item.shortDescription %></p>
+            </div>
+          </article>
+        <% }) %>
+      </section>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/footer') %>

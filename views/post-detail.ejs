@@ -1,0 +1,94 @@
+<%- include('partials/head') %>
+<%- include('partials/header', { categories, platformOptions }) %>
+
+<main class="wrapper post-detail-page">
+  <article class="post-hero">
+    <% if (post.image) { %>
+      <img src="<%= post.image %>" alt="<%= post.title %>" loading="lazy" />
+    <% } %>
+    <div class="post-hero-content">
+      <span class="badge">Comunicado</span>
+      <h1><%= post.title %></h1>
+      <% if (post.subtitle) { %>
+        <p class="muted"><%= post.subtitle %></p>
+      <% } %>
+      <div class="meta-line">
+        <span>Publicado em <%= new Date(post.createdAt).toLocaleDateString('pt-BR') %></span>
+        <span>Atualizado em <%= new Date(post.updatedAt || post.createdAt).toLocaleDateString('pt-BR') %></span>
+      </div>
+      <p><%= post.description %></p>
+      <div class="post-link-actions">
+        <% if (post.externalLink || post.shortLink) { %>
+          <a class="post-action-btn post-action-primary" href="<%= post.shortLink || post.externalLink %>" target="_blank" rel="noopener noreferrer">Abrir link relacionado</a>
+        <% } %>
+        <% (post.postButtons || []).forEach((button) => { %>
+          <a
+            class="post-action-btn post-action-<%= button.style || 'primary' %>"
+            href="<%= button.shortUrl || button.url %>"
+            target="_blank"
+            rel="noopener noreferrer"
+          ><%= button.label %></a>
+        <% }) %>
+      </div>
+    </div>
+  </article>
+
+  <section class="post-body-grid">
+    <article class="post-content-card">
+      <h2>Conteúdo</h2>
+      <div class="post-content-text"><%= post.content || post.description %></div>
+    </article>
+
+    <aside class="post-side-card">
+      <h3>Resumo rápido</h3>
+      <ul class="quick-data">
+        <li><strong>Status:</strong> Publicado</li>
+        <li><strong>Slug:</strong> <%= post.slug %></li>
+        <li><strong>Tipo de link:</strong> <%= post.shortLink ? 'Encurtado' : (post.externalLink ? 'Direto' : 'Sem link') %></li>
+        <li><strong>Botões personalizados:</strong> <%= (post.postButtons || []).length %></li>
+      </ul>
+    </aside>
+  </section>
+
+  <% if (post.youtubeEmbedUrl) { %>
+    <section class="post-video-card">
+      <h2>Vídeo</h2>
+      <div class="video-frame-wrap">
+        <iframe src="<%= post.youtubeEmbedUrl %>" title="Vídeo do comunicado" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </section>
+  <% } %>
+
+  <% if (relatedPosts.length > 0) { %>
+    <section class="carousel-block">
+      <div class="section-title-row">
+        <h2>Outros comunicados</h2>
+        <div>
+          <a href="/comunicados">Ver todos</a>
+          <span class="carousel-controls">
+            <button class="ghost-btn" data-carousel-prev="relatedPostsCarousel">◀</button>
+            <button class="ghost-btn" data-carousel-next="relatedPostsCarousel">▶</button>
+          </span>
+        </div>
+      </div>
+      <div class="carousel-window" data-carousel="relatedPostsCarousel">
+        <div class="carousel-track post-track">
+          <% relatedPosts.forEach((item) => { %>
+            <article class="post-card carousel-item js-post-card" data-post-slug="<%= item.slug %>">
+              <% if (item.image) { %>
+                <a href="/comunicado/<%= item.slug %>"><img src="<%= item.image %>" alt="<%= item.title %>" loading="lazy" /></a>
+              <% } %>
+              <div>
+                <h3><a href="/comunicado/<%= item.slug %>"><%= item.title %></a></h3>
+                <p><%= item.subtitle || item.description %></p>
+                <small><%= new Date(item.createdAt).toLocaleDateString('pt-BR') %></small>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      </div>
+    </section>
+  <% } %>
+</main>
+
+<%- include('partials/footer') %>

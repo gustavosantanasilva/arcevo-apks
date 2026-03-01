@@ -1,0 +1,52 @@
+<header class="top-header" id="topHeader">
+  <div class="notice-bar">
+    <div class="wrapper notice-content">
+      <span><%= site.siteName %> versão atualizada: mais rápido, estável e com UX otimizada.</span>
+      <a href="/buscar">Abrir busca avançada</a>
+    </div>
+  </div>
+
+  <div class="wrapper header-main">
+    <div class="logo-box">
+      <a href="/" class="logo-link"><%= site.siteName %></a>
+      <p><%= site.subtitle %></p>
+    </div>
+
+    <button
+      type="button"
+      class="mobile-menu-toggle"
+      id="mobileMenuToggle"
+      aria-controls="topHeader"
+      aria-expanded="false"
+      aria-label="Abrir menu"
+    >
+      Menu
+    </button>
+
+    <div class="header-actions" id="headerActions">
+      <form action="/buscar" method="GET" class="quick-search" id="quickSearchForm" autocomplete="off">
+        <input id="quickSearchInput" type="text" name="q" value="<%= searchQuery %>" placeholder="Buscar app, versão, recurso premium..." />
+        <button type="submit">Buscar</button>
+        <div id="searchSuggestBox" class="search-suggest" hidden></div>
+      </form>
+
+      <nav class="quick-links">
+        <a href="/recentes">Recentes</a>
+        <a href="/populares">Populares</a>
+        <a href="/comunicados">Posts</a>
+        <a href="/admin">ADM</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="menu-strip">
+    <div class="wrapper categories-scroll">
+      <% categories.forEach((cat) => { %>
+        <a href="/categoria/<%= cat.slug %>" class="chip"><%= cat.name %></a>
+      <% }) %>
+      <% (platformOptions || []).forEach((platform) => { %>
+        <a href="/plataforma/<%= platform.slug %>" class="chip"><%= platform.name %></a>
+      <% }) %>
+    </div>
+  </div>
+</header>

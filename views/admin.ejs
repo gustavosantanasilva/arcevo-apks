@@ -1,0 +1,376 @@
+<%- include('partials/head') %>
+
+<main class="admin-shell sidebar-open">
+  <aside class="admin-sidebar">
+    <h2>Arcevo ADM</h2>
+    <button data-tab="dashboard" class="tab-link active">Dashboard</button>
+    <button data-tab="apps" class="tab-link">APKs</button>
+    <button data-tab="home-carousels" class="tab-link">Carrosséis Home</button>
+    <button data-tab="categories" class="tab-link">Categorias</button>
+    <button data-tab="platforms" class="tab-link">Plataformas</button>
+    <button data-tab="premium" class="tab-link">Premium</button>
+    <button data-tab="posts" class="tab-link">Posts</button>
+    <button data-tab="banners" class="tab-link">Banners</button>
+    <button data-tab="settings" class="tab-link">Configurações</button>
+    <button id="logoutBtn">Sair</button>
+  </aside>
+
+  <section class="admin-content">
+    <header class="admin-page-head">
+      <h1>Painel Administrativo</h1>
+      <button id="adminNavToggle" class="admin-nav-toggle" type="button" aria-expanded="false">Seções</button>
+      <p id="clockRealtime"></p>
+    </header>
+
+    <section data-panel="dashboard" class="panel active">
+      <h3>Dados em tempo real</h3>
+      <div class="stats-grid">
+        <article><span>Total de APKs</span><strong id="statApps">0</strong></article>
+        <article><span>Downloads totais</span><strong id="statDownloads">0</strong></article>
+        <article><span>Categorias</span><strong id="statCategories">0</strong></article>
+        <article><span>APKs hoje</span><strong id="statToday">0</strong></article>
+      </div>
+      <div class="dashboard-chart-grid">
+        <article class="dashboard-chart-card">
+          <div class="section-title-row compact">
+            <h4>Downloads por App</h4>
+            <small>Top 8</small>
+          </div>
+          <canvas id="chartTopApps" height="170"></canvas>
+        </article>
+
+        <article class="dashboard-chart-card">
+          <div class="section-title-row compact">
+            <h4>Distribuição por Categoria</h4>
+            <small>Apps ativos</small>
+          </div>
+          <canvas id="chartCategories" height="170"></canvas>
+        </article>
+
+        <article class="dashboard-chart-card">
+          <div class="section-title-row compact">
+            <h4>Distribuição por Plataforma</h4>
+            <small>Mobile, PC e mais</small>
+          </div>
+          <canvas id="chartPlatforms" height="170"></canvas>
+        </article>
+
+        <article class="dashboard-chart-card">
+          <div class="section-title-row compact">
+            <h4>Evolução de Conteúdo</h4>
+            <small>Últimos 30 dias</small>
+          </div>
+          <canvas id="chartTimeline" height="170"></canvas>
+        </article>
+      </div>
+
+      <div class="dashboard-bottom-grid">
+        <article class="dashboard-list-card">
+          <h4>Atividade recente</h4>
+          <ul id="dashboardRecentActivity" class="dashboard-activity-list"></ul>
+        </article>
+        <article class="dashboard-list-card">
+          <h4>Saúde de links</h4>
+          <ul id="dashboardLinkHealth" class="dashboard-health-list"></ul>
+        </article>
+      </div>
+      <p>Atualização automática do painel e gráficos.</p>
+    </section>
+
+    <section data-panel="apps" class="panel">
+      <h3>Gerenciar APKs</h3>
+      <form id="appForm" class="grid-form">
+        <input type="hidden" name="id" />
+        <input name="name" placeholder="Nome" required />
+        <input name="version" placeholder="Versão" />
+        <input name="icon" placeholder="URL do ícone" />
+        <input name="cover" placeholder="URL da capa" />
+        <input name="apkLink" placeholder="Link fallback (opcional)" />
+        <input name="shortDescription" placeholder="Descrição curta" required />
+        <textarea name="description" placeholder="Descrição completa" required></textarea>
+        <textarea name="details" placeholder="Detalhes da atualização"></textarea>
+
+        <div class="multi-field">
+          <strong>Categorias do app (múltiplas)</strong>
+          <div id="appCategorySummary" class="picker-summary">Nenhuma selecionada.</div>
+          <button type="button" class="ghost-btn picker-open-btn" data-picker-open="appCategories">Selecionar / Pesquisar categorias</button>
+          <select name="categoryIds" id="appCategorySelect" class="native-multi" multiple required></select>
+        </div>
+        <div class="multi-field">
+          <strong>Plataformas do app (múltiplas)</strong>
+          <div id="appPlatformSummary" class="picker-summary">Nenhuma selecionada.</div>
+          <button type="button" class="ghost-btn picker-open-btn" data-picker-open="appPlatforms">Selecionar / Pesquisar plataformas</button>
+          <select name="platforms" id="appPlatformSelect" class="native-multi" multiple></select>
+        </div>
+
+        <label class="checkbox-line">
+          <input type="checkbox" name="enablePremiumTags" checked /> Este app possui categorias premium/mod
+        </label>
+        <div id="premiumTagsSection" class="conditional-block">
+          <strong>Categorias MOD (Sem anúncios, ilimitado, dinheiro infinito...)</strong>
+          <div id="appPremiumSummary" class="picker-summary">Nenhuma selecionada.</div>
+          <button type="button" class="ghost-btn picker-open-btn" data-picker-open="appPremiumTags">Selecionar / Pesquisar categorias MOD</button>
+          <select name="premiumTagIds" id="appPremiumSelect" class="native-multi" multiple></select>
+        </div>
+
+        <label class="checkbox-line">
+          <input type="checkbox" name="enableRequiredApps" /> Este app requer outros aplicativos
+        </label>
+        <div id="requiredAppsSection" class="conditional-block" hidden>
+          <strong>Apps obrigatórios (pode marcar vários)</strong>
+          <div id="appRequiredSummary" class="picker-summary">Nenhum selecionado.</div>
+          <button type="button" class="ghost-btn picker-open-btn" data-picker-open="appRequiredApps">Selecionar / Pesquisar apps obrigatórios</button>
+          <select name="requiredAppIds" id="appRequiredAppsSelect" class="native-multi" multiple></select>
+        </div>
+
+        <div class="post-buttons-builder">
+          <div class="post-buttons-head">
+            <strong>Links de download por plataforma</strong>
+            <button type="button" id="syncPlatformLinksBtn" class="ghost-btn">Sincronizar plataformas</button>
+          </div>
+          <p>Cada plataforma selecionada deve ter seu link. Marque apenas os links que você quer encurtar.</p>
+          <div id="platformLinksEditor" class="post-buttons-editor"></div>
+        </div>
+
+        <label class="checkbox-line">
+          <input type="checkbox" name="isFeatured" /> Destaque na home
+        </label>
+        <label class="checkbox-line">
+          <input type="checkbox" name="shortenOnSave" checked /> Encurtar link ao salvar/atualizar
+        </label>
+
+        <button type="submit">Salvar APK</button>
+        <button type="button" id="resetAppForm">Limpar</button>
+      </form>
+
+      <div class="listing-toolbar admin-toolbar">
+        <input id="adminAppSearch" type="text" placeholder="Filtrar APKs por nome, categoria ou premium..." />
+        <p id="adminAppCounter">0 APK(s)</p>
+      </div>
+
+      <div class="table-wrap">
+        <table id="appsTable">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Categoria</th>
+              <th>Premium</th>
+              <th>Link</th>
+              <th>Downloads</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section data-panel="home-carousels" class="panel">
+      <h3>Carrosséis da Página Inicial</h3>
+      <form id="homeCarouselForm" class="grid-form">
+        <input type="hidden" name="id" />
+        <input name="name" placeholder="Nome do carrossel (ex.: Atualizações RPG)" required />
+        <select name="sort">
+          <option value="featured">Destaque</option>
+          <option value="recent">Recentes</option>
+          <option value="popular">Populares</option>
+        </select>
+        <input type="number" name="limit" min="3" max="20" value="10" placeholder="Limite de apps" />
+        <div class="multi-field">
+          <strong>Filtrar por categorias</strong>
+          <div id="homeCarouselCategorySummary" class="picker-summary">Sem filtros.</div>
+          <button type="button" class="ghost-btn picker-open-btn" data-picker-open="homeCarouselCategories">Selecionar / Pesquisar categorias</button>
+          <select name="categorySlugs" id="homeCarouselCategorySelect" class="native-multi" multiple></select>
+        </div>
+        <div class="multi-field">
+          <strong>Filtrar por premium/mod</strong>
+          <div id="homeCarouselPremiumSummary" class="picker-summary">Sem filtros.</div>
+          <button type="button" class="ghost-btn picker-open-btn" data-picker-open="homeCarouselPremium">Selecionar / Pesquisar premium</button>
+          <select name="premiumSlugs" id="homeCarouselPremiumSelect" class="native-multi" multiple></select>
+        </div>
+        <div class="multi-field">
+          <strong>Filtrar por plataformas</strong>
+          <div id="homeCarouselPlatformSummary" class="picker-summary">Sem filtros.</div>
+          <button type="button" class="ghost-btn picker-open-btn" data-picker-open="homeCarouselPlatforms">Selecionar / Pesquisar plataformas</button>
+          <select name="platformSlugs" id="homeCarouselPlatformSelect" class="native-multi" multiple></select>
+        </div>
+        <button type="submit">Salvar carrossel</button>
+        <button type="button" id="resetHomeCarouselForm">Limpar</button>
+      </form>
+
+      <div class="table-wrap">
+        <table id="homeCarouselsTable">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Filtros</th>
+              <th>Sort/Limite</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section data-panel="categories" class="panel">
+      <h3>Categorias do site</h3>
+      <form id="categoryForm" class="inline-form">
+        <input name="name" placeholder="Nova categoria" required />
+        <button type="submit">Adicionar</button>
+      </form>
+      <ul id="categoryList" class="pill-list"></ul>
+    </section>
+
+    <section data-panel="platforms" class="panel">
+      <h3>Plataformas (PC, Mobile...)</h3>
+      <form id="platformForm" class="inline-form">
+        <input name="name" placeholder="Ex.: Console" required />
+        <select name="iconKey" id="platformIconSelect">
+          <option value="mobile">Mobile genérico</option>
+          <option value="android">Android</option>
+          <option value="iphone">iPhone / iOS</option>
+          <option value="pc">PC genérico</option>
+          <option value="windows">Windows</option>
+          <option value="mac">macOS</option>
+          <option value="linux">Linux</option>
+          <option value="web">Web</option>
+        </select>
+        <button type="submit">Adicionar</button>
+      </form>
+      <ul id="platformList" class="pill-list"></ul>
+    </section>
+
+    <section data-panel="premium" class="panel">
+      <h3>Categorias premium</h3>
+      <form id="premiumForm" class="inline-form">
+        <input name="name" placeholder="Ex.: Sem anúncios" required />
+        <button type="submit">Adicionar</button>
+      </form>
+      <ul id="premiumList" class="pill-list"></ul>
+    </section>
+
+    <section data-panel="posts" class="panel">
+      <h3>Posts e Comunicados</h3>
+      <form id="postForm" class="grid-form">
+        <input type="hidden" name="id" />
+        <input name="title" placeholder="Título do post" required />
+        <input name="subtitle" placeholder="Subtítulo" />
+        <input name="image" placeholder="URL da imagem" />
+        <input name="youtubeUrl" placeholder="Link do YouTube (opcional)" />
+        <input name="externalLink" placeholder="Link externo do post" />
+        <input name="description" placeholder="Descrição curta" required />
+        <textarea name="content" placeholder="Conteúdo completo do post"></textarea>
+
+        <div class="post-buttons-builder">
+          <div class="post-buttons-head">
+            <strong>Botões personalizados do post</strong>
+            <button type="button" id="addPostButtonBtn" class="ghost-btn">Adicionar botão</button>
+          </div>
+          <p>Crie botões com rótulo e link. Você escolhe quais links serão encurtados.</p>
+          <div id="postButtonsEditor" class="post-buttons-editor"></div>
+        </div>
+
+        <label class="checkbox-line">
+          <input type="checkbox" name="shortenExternalLink" checked /> Encurtar link externo principal do post
+        </label>
+        <label class="checkbox-line">
+          <input type="checkbox" name="isPublished" checked /> Publicar imediatamente
+        </label>
+
+        <button type="submit">Salvar post</button>
+        <button type="button" id="resetPostForm">Limpar</button>
+      </form>
+
+      <div class="table-wrap">
+        <table id="postsTable">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Status</th>
+              <th>Links</th>
+              <th>Atualizado</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section data-panel="banners" class="panel">
+      <h3>Banners da home</h3>
+      <form id="bannerForm" class="inline-form grid-3">
+        <input name="title" placeholder="Título" required />
+        <input name="image" placeholder="URL da imagem" required />
+        <input name="link" placeholder="Link interno" required />
+        <input name="badge" placeholder="Selo (opcional)" />
+        <button type="submit">Adicionar banner</button>
+      </form>
+      <ul id="bannerList" class="banner-list"></ul>
+    </section>
+
+    <section data-panel="settings" class="panel">
+      <h3>Configurações e Segurança</h3>
+
+      <form id="siteSettingsForm" class="grid-form">
+        <input name="siteName" placeholder="Nome do site" required />
+        <input name="subtitle" placeholder="Subtítulo do site" required />
+        <select name="theme">
+          <option value="ocean">Ocean</option>
+          <option value="sunset">Sunset</option>
+          <option value="midnight">Midnight</option>
+        </select>
+        <button type="submit">Salvar configurações do site</button>
+      </form>
+
+      <form id="accountSettingsForm" class="grid-form">
+        <input name="username" placeholder="Novo usuário" required />
+        <input name="currentPassword" type="password" placeholder="Senha atual" required />
+        <input name="newPassword" type="password" placeholder="Nova senha (opcional)" />
+        <button type="submit">Atualizar conta admin</button>
+      </form>
+
+      <form id="verificationSettingsForm" class="grid-form">
+        <input name="newCode" type="password" placeholder="Nova senha de verificação" required />
+        <input name="currentPassword" type="password" placeholder="Senha atual admin" required />
+        <button type="submit">Atualizar senha de verificação</button>
+      </form>
+    </section>
+  </section>
+</main>
+
+<div id="pickerModal" class="picker-modal" hidden>
+  <div class="picker-backdrop" data-picker-close="1"></div>
+  <div class="picker-dialog">
+    <header class="picker-head">
+      <h3 id="pickerModalTitle">Selecionar itens</h3>
+      <span id="pickerModalMeta" class="picker-meta"></span>
+      <button type="button" class="ghost-btn" data-picker-close="1">Fechar</button>
+    </header>
+    <input id="pickerModalSearch" type="text" placeholder="Pesquisar por nome..." />
+    <div id="pickerModalList" class="picker-list"></div>
+    <div id="pickerCreateRow" class="picker-create" hidden>
+      <input id="pickerCreateInput" type="text" placeholder="Adicionar novo" />
+      <button type="button" id="pickerCreateBtn">Adicionar nova</button>
+    </div>
+    <footer class="picker-foot">
+      <button type="button" class="ghost-btn" id="pickerClearBtn">Limpar</button>
+      <button type="button" id="pickerApplyBtn">Aplicar seleção</button>
+    </footer>
+  </div>
+</div>
+
+<script>
+  window.__ARCEVO_BOOTSTRAP__ = {
+    categories: <%- JSON.stringify(categories) %>,
+    premiumTags: <%- JSON.stringify(premiumTags) %>,
+    platformOptions: <%- JSON.stringify(platformOptions) %>,
+    settings: <%- JSON.stringify(settings || {}) %>,
+    homeCarousels: <%- JSON.stringify(homeCarousels || []) %>
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="/js/admin.js" defer></script>
+</body>
+</html>
