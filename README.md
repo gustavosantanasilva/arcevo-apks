@@ -78,3 +78,20 @@ Se o encurtamento falhar, o APK não é salvo/atualizado.
 - Troque `JWT_SECRET` por uma chave forte antes de produção.
 - Em produção, ative HTTPS e ajuste cookie `secure: true`.
 - Para alta escala, substitua o JSON local por banco (PostgreSQL/MySQL).
+
+## Deploy em Vercel e Netlify
+
+### Vercel
+
+- O projeto já inclui `vercel.json` e a função `api/index.js` para rotear todas as requisições ao Express.
+- Configure as variáveis de ambiente no painel da Vercel (`JWT_SECRET`, `ADMIN_USER`, `ADMIN_PASSWORD`, `ADMIN_VERIFY_CODE`, `SITE_URL`, `ENCURTANET_*`).
+
+### Netlify
+
+- O projeto já inclui `netlify.toml` e a função `netlify/functions/server.js` com `serverless-http`.
+- Defina as variáveis de ambiente no painel da Netlify, iguais às usadas localmente.
+
+### Persistência em Serverless
+
+- Vercel/Netlify não garantem persistência no filesystem. O app faz fallback automático para um arquivo temporário em `/tmp`.
+- Para produção, use um banco externo ou monte armazenamento persistente e defina `ARCEVO_STORE_PATH`.

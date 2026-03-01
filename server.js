@@ -2072,6 +2072,18 @@ function startServer(preferredPort, retryCount = 0) {
   });
 }
 
-ensureAdmin().then(() => {
-  startServer(PORT);
-});
+let initPromise = null;
+function init() {
+  if (!initPromise) {
+    initPromise = ensureAdmin();
+  }
+  return initPromise;
+}
+
+if (require.main === module) {
+  init().then(() => {
+    startServer(PORT);
+  });
+}
+
+module.exports = { app, init };

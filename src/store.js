@@ -1,7 +1,40 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
-const DB_PATH = path.join(__dirname, '..', 'data', 'store.json');
+const ROOT_DIR = path.join(__dirname, '..');
+const DEFAULT_DATA_DIR = path.join(ROOT_DIR, 'data');
+const DATA_DIR = process.env.ARCEVO_DATA_DIR || DEFAULT_DATA_DIR;
+const EXPLICIT_STORE_PATH = process.env.ARCEVO_STORE_PATH;
+const TMP_STORE_PATH = path.join(os.tmpdir(), 'arcevo-store.json');
+
+function ensureWritableDir(dir) {
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+    fs.accessSync(dir, fs.constants.W_OK);
+    return true;
+  } catch (_error) {
+    return false;
+  }
+}
+
+function resolveStorePath() {
+  if (EXPLICIT_STORE_PATH) {
+    const dir = path.dirname(EXPLICIT_STORE_PATH);
+    if (ensureWritableDir(dir)) {
+      return EXPLICIT_STORE_PATH;
+    }
+  }
+
+  if (ensureWritableDir(DATA_DIR)) {
+    return path.join(DATA_DIR, 'store.json');
+  }
+
+  return TMP_STORE_PATH;
+}
+
+let activeStorePath = resolveStorePath();
+let warnedTmpFallback = false;
 
 const defaultStore = {
   settings: {
@@ -174,6 +207,43 @@ const defaultStore = {
   admins: []
 };
 
+function isWritePermissionError(error) {
+  return ['EROFS', 'EACCES', 'EPERM'].includes(error?.code);
+}
+
+function fallbackToTmp(reason) {
+  if (activeStorePath === TMP_STORE_PATH) return;
+  const previousPath = activeStorePath;
+  activeStorePath = TMP_STORE_PATH;
+
+  if (!warnedTmpFallback) {
+    console.warn(`Storage local indisponível (${reason}). Usando arquivo temporário em ${TMP_STORE_PATH}.`);
+    warnedTmpFallback = true;
+  }
+
+  try {
+    fs.mkdirSync(path.dirname(TMP_STORE_PATH), { recursive: true });
+  } catch (_error) {
+    // ignora falha ao preparar diretório temporário
+  }
+
+  try {
+    if (fs.existsSync(previousPath)) {
+      const raw = fs.readFileSync(previousPath, 'utf8');
+      fs.writeFileSync(activeStorePath, raw);
+      return;
+    }
+  } catch (_error) {
+    // ignora falhas ao copiar o store anterior
+  }
+
+  try {
+    fs.writeFileSync(activeStorePath, JSON.stringify(defaultStore, null, 2));
+  } catch (_error) {
+    // ignora falha ao criar store temporário
+  }
+}
+
 function migrateStore(store) {
   let changed = false;
 
@@ -326,28 +396,53 @@ function migrateStore(store) {
 }
 
 function ensureStore() {
-  if (!fs.existsSync(DB_PATH)) {
-    fs.writeFileSync(DB_PATH, JSON.stringify(defaultStore, null, 2));
-    return;
-  }
+  try {
+    if (!fs.existsSync(activeStorePath)) {
+      fs.writeFileSync(activeStorePath, JSON.stringify(defaultStore, null, 2));
+      return;
+    }
 
-  const store = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-  if (migrateStore(store)) {
-    fs.writeFileSync(DB_PATH, JSON.stringify(store, null, 2));
+    const store = JSON.parse(fs.readFileSync(activeStorePath, 'utf8'));
+    if (migrateStore(store)) {
+      fs.writeFileSync(activeStorePath, JSON.stringify(store, null, 2));
+    }
+  } catch (error) {
+    if (isWritePermissionError(error)) {
+      fallbackToTmp(error.code || 'permissão');
+      return ensureStore();
+    }
+    throw error;
   }
 }
 
 function readStore() {
   ensureStore();
-  const store = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-  if (migrateStore(store)) {
-    writeStore(store);
+  try {
+    const store = JSON.parse(fs.readFileSync(activeStorePath, 'utf8'));
+    if (migrateStore(store)) {
+      writeStore(store);
+    }
+    return store;
+  } catch (error) {
+    if (isWritePermissionError(error)) {
+      fallbackToTmp(error.code || 'permissão');
+      return readStore();
+    }
+    throw error;
   }
-  return store;
 }
 
 function writeStore(store) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(store, null, 2));
+  try {
+    fs.writeFileSync(activeStorePath, JSON.stringify(store, null, 2));
+  } catch (error) {
+    if (isWritePermissionError(error)) {
+      fallbackToTmp(error.code || 'permissão');
+      fs.writeFileSync(activeStorePath, JSON.stringify(store, null, 2));
+      return;
+    }
+    throw error;
+  }
 }
 
 module.exports = {
