@@ -113,22 +113,18 @@
       "cover": "https://tekmods.com/wp-content/uploads/2026/01/YouTube-Morphe-apk-para-android.jpg",
       "apkLink": "https://www.mediafire.com/file_premium/4evgcrdsnp1hpo5/YouTube_Morphe_-_v20.40.45_Tekmods.com.apk/file",
       "shortLink": "https://4br.me/youtube-morphe-mobile",
-      "categoryId": "cat-tools",
+      "categoryId": "cat-stream",
       "platforms": [
         "mobile"
       ],
       "premiumTagIds": [
-        "prem-no-ads",
-        "prem-unlimited",
-        "prem-money"
+        "prem-no-ads"
       ],
       "isFeatured": true,
       "downloads": 1,
       "createdAt": "2026-03-01T18:19:46.397Z",
-      "updatedAt": "2026-03-01T20:58:43.762Z",
+      "updatedAt": "2026-03-01T19:08:56.703Z",
       "categoryIds": [
-        "cat-tools",
-        "cat-social",
         "cat-stream"
       ],
       "requiredAppIds": [
